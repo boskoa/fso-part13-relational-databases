@@ -1,9 +1,10 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImtvcmlzbmlrIiwiaWQiOjEsImlhdCI6MTY1MjYyODM2N30.ctkRIfj-vBow19lwKJiQD_7nzmu4wVrsUNCSF7kihzU
 
 {
-    "title": "How to check blog post",
+    "title": "Deleting blog",
     "author": "Šećo",
-    "url": "https://www.example.com/3",
-    "likes": 25
+    "url": "https://www.example.com/45",
+    "likes": 12
 }

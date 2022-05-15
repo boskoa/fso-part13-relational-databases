@@ -1,8 +1,16 @@
 const router = require('express').Router()
-const { Blog } = require('../models')
+const { Blog, User } = require('../models')
+const tokenExtractor = require('../utils/tokenExtractor')
 
 router.get('/', async (req, res, next) => {
-  const blogs = await Blog.findAll()
+  const blogs = await Blog.findAll({
+    include: {
+      model: User,
+      attributes: {
+        exclude: ['id', 'username', 'passwordHash', 'createdAt', 'updatedAt']
+      }
+    }
+  })
 
   blogs.map((b) => {
     console.log(`${b.author}: '${b.title}', ${b.likes} likes`)
@@ -24,19 +32,30 @@ router.get('/:id', async (req, res, next) => {
   }
 })
 
-router.post('/', async (req, res, next) => {
+router.post('/', tokenExtractor, async (req, res, next) => {
   try {
-    const blog = await Blog.create(req.body)
+    const user = await User.findByPk(req.decodedToken.id)
+    const blog = await Blog.create({ ...req.body, userId: user.id })
     res.json(blog)
   } catch (error) {
     next(error)
   }
 })
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', tokenExtractor, async (req, res, next) => {
   try {
-    await Blog.destroy({ where: { id: req.params.id } })
-    res.status(200).end()
+    console.log('DELETE', req.decodedToken, req.params.id)
+    const blogToDelete = await Blog.findByPk(req.params.id)
+    const user = await User.findOne({
+      where: { username: req.decodedToken.username }
+    })
+    console.log('DELETE', JSON.stringify(user, null, 2), JSON.stringify(blogToDelete, null, 2))
+    if (user.id === blogToDelete.userId) {
+      await Blog.destroy({ where: { id: req.params.id } })
+      res.status(200).end()
+    } else {
+      return response.status(401).json({ error: 'Not your blog' })
+    }
   } catch (error) {
     next(error)
   }

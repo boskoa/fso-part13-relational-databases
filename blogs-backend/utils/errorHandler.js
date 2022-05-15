@@ -6,7 +6,7 @@ const errorHandler = (error, req, res, next) => {
   } else if (error.name === 'TypeError') {
     return res.status(400).send({ error: 'Not found'})
   } else if (error.name === 'SequelizeValidationError') {
-    return res.status(400).send({ error: 'Wrong or incoplete data'})
+    return res.status(400).send({ error: error.message })
   }
 
   next(error)
