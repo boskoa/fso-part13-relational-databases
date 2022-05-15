@@ -1,15 +1,35 @@
 const router = require('express').Router()
+const { Op } = require('sequelize')
 const { Blog, User } = require('../models')
 const tokenExtractor = require('../utils/tokenExtractor')
 
 router.get('/', async (req, res, next) => {
+  let where = {}
+
+  if (req.query.search) {
+    where = {
+      [Op.or]: [
+        { title: {
+          [Op.substring]: req.query.search
+          }
+        }, {
+          author: {
+            [Op.substring]: req.query.search
+          }
+        }
+      ]
+    }
+  }
+
   const blogs = await Blog.findAll({
     include: {
       model: User,
-      attributes: {
-        exclude: ['id', 'username', 'passwordHash', 'createdAt', 'updatedAt']
-      }
-    }
+      attributes: ['name']
+    },
+    where,
+    order: [
+      ['likes', 'DESC']
+    ]
   })
 
   blogs.map((b) => {
@@ -44,12 +64,10 @@ router.post('/', tokenExtractor, async (req, res, next) => {
 
 router.delete('/:id', tokenExtractor, async (req, res, next) => {
   try {
-    console.log('DELETE', req.decodedToken, req.params.id)
     const blogToDelete = await Blog.findByPk(req.params.id)
     const user = await User.findOne({
       where: { username: req.decodedToken.username }
     })
-    console.log('DELETE', JSON.stringify(user, null, 2), JSON.stringify(blogToDelete, null, 2))
     if (user.id === blogToDelete.userId) {
       await Blog.destroy({ where: { id: req.params.id } })
       res.status(200).end()
