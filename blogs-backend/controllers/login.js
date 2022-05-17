@@ -23,6 +23,12 @@ router.post('/', async (request, response) => {
     })
   }
 
+  if (user.disabled) {
+    return response.status(401).json({
+      error: 'Account disabled'
+    })
+  }
+
   const userForToken = {
     username: user.username,
     id: user.id,

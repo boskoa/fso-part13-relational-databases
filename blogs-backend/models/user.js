@@ -3,7 +3,6 @@ const { Model, DataTypes } = require('sequelize')
 const { sequelize } = require('../utils/db')
 
 class User extends Model {}
-
 User.init({
   id: {
     type: DataTypes.INTEGER,
@@ -25,6 +24,10 @@ User.init({
   passwordHash: {
     type: DataTypes.STRING,
     allowNull: false
+  },
+  disabled: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
   }
 }, {
   sequelize,
