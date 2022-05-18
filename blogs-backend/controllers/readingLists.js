@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const ReadingList = require('../models/readingList')
 const User = require('../models/user')
+const sessionChecker = require('../utils/sessionChecker')
 const tokenExtractor = require('../utils/tokenExtractor')
 
 router.post('/', async (req, res, next) => {
@@ -12,7 +13,7 @@ router.post('/', async (req, res, next) => {
   }
 })
 
-router.put('/:id', tokenExtractor, async (req, res, next) => {
+router.put('/:id', tokenExtractor, sessionChecker, async (req, res, next) => {
   try {
     const user = await User.findOne({
       where: { username: req.decodedToken.username }

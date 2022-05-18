@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const { Op } = require('sequelize')
 const { Blog, User } = require('../models')
+const sessionChecker = require('../utils/sessionChecker')
 const tokenExtractor = require('../utils/tokenExtractor')
 
 router.get('/', async (req, res, next) => {
@@ -52,7 +53,7 @@ router.get('/:id', async (req, res, next) => {
   }
 })
 
-router.post('/', tokenExtractor, async (req, res, next) => {
+router.post('/', tokenExtractor, sessionChecker, async (req, res, next) => {
   try {
     const user = await User.findByPk(req.decodedToken.id)
     const blog = await Blog.create({ ...req.body, userId: user.id })
@@ -62,7 +63,7 @@ router.post('/', tokenExtractor, async (req, res, next) => {
   }
 })
 
-router.delete('/:id', tokenExtractor, async (req, res, next) => {
+router.delete('/:id', tokenExtractor, sessionChecker, async (req, res, next) => {
   try {
     const blogToDelete = await Blog.findByPk(req.params.id)
     const user = await User.findOne({

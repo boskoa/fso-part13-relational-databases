@@ -1,6 +1,6 @@
-PUT http://localhost:3003/api/users/:korisnik2
+PUT http://localhost:3003/api/users/:korisnik2@korisnik.com
 Content-Type: application/json
 
 {
-    "newUsername": "korisnikdva"
+    "disabled": false
 }

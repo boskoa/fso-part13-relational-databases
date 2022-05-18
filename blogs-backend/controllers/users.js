@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt')
 const { User, Blog } = require('../models')
 const ReadingList = require('../models/readingList')
 const { Op } = require('sequelize')
+const Session = require('../models/session')
 
 router.get('/', async (req, res) => {
   const users = await User.findAll({
@@ -81,7 +82,15 @@ router.put('/:username', async (req, res, next) => {
         username: req.params.username.substring(1)
       }
     })
-    user.username = req.body.newUsername
+    if (req.body.newUsername) {
+      user.username = req.body.newUsername
+    }
+
+    if (req.body.disabled !== undefined) {
+      user.disabled = req.body.disabled
+      await Session.destroy({ where: {userId: user.id }})
+    }
+    
     user.save()
     res.json(user)
   } catch (error) {
